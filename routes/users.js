@@ -1,6 +1,58 @@
 const express = require('express');
 const router = express.Router();
-const { User, Event } = require('../models/index');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+const { User, Event, Comment } = require('../models/index');
+
+
+//POST/REGISTER
+router.post('/register', async (req, res, next) => {
+    try {
+        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference } = req.body;
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+        const user = await User.create({
+            firstName,
+            lastName,
+            username,
+            password: hash,
+            location,
+            age,
+            job,
+            about,
+            hobbies,
+            distancePreference 
+        });
+        const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET);
+        res.send({ message: "User successfully registered!", token, hash });
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+})
+
+router.post('/login', async (req ,res, next) => {
+    try {
+        const { username, password } = req.body;
+        
+        const  userToLogin = await User.findOne({ where: { username: username }});
+        if (userToLogin === null) {
+            res.send('User note found, please try again or register user.');
+        } else {
+            const comparePasswords = await bcrypt.compare(password, userToLogin.password);
+            if (!comparePasswords){
+                console.log(userToLogin.password, password)
+                res.send("Failed to Login.")
+            } else {
+                const token = jwt.sign(username, process.env.JWT_SECRET);
+                res.send({ message: `Welcome, ${userToLogin.firstName}, you have successfully been logged in!`, token });
+            }
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 router.get('/', async (req, res, next) => {
     try {
@@ -23,7 +75,8 @@ router.get('/:id', async (req, res, next) => {
             where: {
                 id: id
             }, include: [
-                { model: Event, as: 'Events' }
+                { model: Event, as: 'Events' },
+                // { model: Comment, as: "Comments" }
             ]
         })
         res.json(user);
@@ -40,7 +93,8 @@ router.get('/user/:username', async (req, res, next) => {
             where: {
                 username: username
             }, include: [
-                { model: Event, as: 'Events' }
+                { model: Event, as: 'Events' },
+                // { model: Comment, as: "Comments" }
             ]
         })
         res.json(user);
@@ -62,7 +116,7 @@ router.post('/', async (req, res, next) => {
             job: job,
             about: about,
             hobbies: hobbies,
-            distancePreference: distancePreference
+            distancePreference: distancePreference,
         });
         res.json(newUser);
     } catch (error) {
@@ -72,10 +126,11 @@ router.post('/', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
     try {
-        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference } = req.body;
+        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference, profilePicture } = req.body;
         const id = req.params.id;
         const user = await User.findByPk(id);
-        await user.update({ firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference });
+        const hashedPW = await hashPassword(password, 10);
+        await user.update({ firstName, lastName, username, password: hashedPW, location, age, job, about, hobbies, distancePreference, profilePicture });
         res.status(201).json(user);
     } catch (error) {
         next(error);

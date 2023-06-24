@@ -40,6 +40,10 @@ const User = sequelize.define('User', {
     distancePreference: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    profilePicture: {
+        type: DataTypes.STRING,
+        defaultValue: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTfei884VzPFy3FShvUo3QOWhdufOlUy55zJr-yLz5_qs_wW3fy"
     }
 
 })

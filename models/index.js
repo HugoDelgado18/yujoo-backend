@@ -10,6 +10,7 @@ const Comment = require('./Comment');
 // Event.belongsTo(User, { foreignKey: "user_id" });
 // User.hasMany(Event);
 Comment.belongsTo(Event);
+// Comment.belongsTo(User);
 Event.hasMany(Comment);
 User.belongsToMany(Event, { through: "User_Events" });
 Event.belongsToMany(User, { through: "User_Events" });
