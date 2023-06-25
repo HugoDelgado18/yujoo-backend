@@ -6,7 +6,8 @@ router.get('/', async (req, res, next) => {
     try {
         const events = await Event.findAll({
             include: [
-                { model: User, as: "Users" }
+                { model: User, as: "Users" },
+                { model: Comment, as: "Comments" }
             ]
         });
         res.json(events);
@@ -50,15 +51,14 @@ router.get('/event/:title', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     try {
-        const { title, description, date, time, duration, image, comment } = req.body;
+        const { title, description, startDatetime, endDatetime, duration, image } = req.body;
         const newEvent = await Event.create({
             title: title,
             description: description,
-            date: date,
-            time: time,
+            startDatetime: startDatetime,
+            endDatetime: endDatetime,
             duration: duration,
             image: image,
-            comment: comment
         })
         res.json(newEvent);
     } catch (error) {
@@ -68,10 +68,10 @@ router.post('/', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
     try {
-        const { title, description, date, time, duration, image, comment } = req.body;
+        const { title, description, startDatetime, endDatetime, duration, image } = req.body;
         const id = req.params.id;
         const event = await Event.findByPk(id);
-        await event.update({ title, description, date, time, duration, image, comment });
+        await event.update({ title, description, startDatetime, endDatetime, duration, image });
         res.status(201).json(event);
     } catch (error) {
         next(error);

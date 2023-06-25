@@ -9,11 +9,11 @@ const Event = sequelize.define('Event', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    date: {
-        type: DataTypes.DATEONLY,
+    startDatetime: {
+        type: DataTypes.STRING,
         allowNull: false
     },
-    time: {
+    endDatetime: {
         type: DataTypes.STRING,
         allowNull: false
     },
@@ -25,10 +25,6 @@ const Event = sequelize.define('Event', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    comment: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
 })
 
 module.exports = Event;

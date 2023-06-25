@@ -3,12 +3,13 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const { User, Event, Comment } = require('../models/index');
+const authenticateJWT = require('../middleware/index');
 
 
 //POST/REGISTER
 router.post('/register', async (req, res, next) => {
     try {
-        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference } = req.body;
+        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference, profilePicture } = req.body;
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
         const user = await User.create({
@@ -21,7 +22,8 @@ router.post('/register', async (req, res, next) => {
             job,
             about,
             hobbies,
-            distancePreference 
+            distancePreference,
+            profilePicture 
         });
         const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET);
         res.send({ message: "User successfully registered!", token, hash });
@@ -53,7 +55,7 @@ router.post('/login', async (req ,res, next) => {
     }
 });
 
-
+// get all users
 router.get('/', async (req, res, next) => {
     try {
         const allUsers = await User.findAll({
@@ -67,6 +69,7 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+// get user by id
 router.get('/:id', async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -105,7 +108,7 @@ router.get('/user/:username', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     try {
-        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference } = req.body;
+        const { firstName, lastName, username, password, location, age, job, about, hobbies, distancePreference, profilePicture } = req.body;
         const newUser = await User.create({
             firstName: firstName,
             lastName: lastName,
@@ -117,6 +120,7 @@ router.post('/', async (req, res, next) => {
             about: about,
             hobbies: hobbies,
             distancePreference: distancePreference,
+            profilePicture: profilePicture
         });
         res.json(newUser);
     } catch (error) {
@@ -151,7 +155,7 @@ router.delete('/:id', async (req, res, next) => {
 router.post('/event/:id', async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { title, description, date, time, duration, image, comment } = req.body;
+        const { title, description, date, time, duration, image } = req.body;
         const user = await User.findByPk(userId);
         const newEvent = await Event.create({
             title: title,
@@ -160,7 +164,6 @@ router.post('/event/:id', async (req, res, next) => {
             time: time,
             duration: duration,
             image: image,
-            comment: comment
         })
         await user.addEvent(newEvent);
         res.json(newEvent);

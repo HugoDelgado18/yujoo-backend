@@ -43,7 +43,8 @@ const User = sequelize.define('User', {
     },
     profilePicture: {
         type: DataTypes.STRING,
-        defaultValue: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTfei884VzPFy3FShvUo3QOWhdufOlUy55zJr-yLz5_qs_wW3fy"
+        defaultValue: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTfei884VzPFy3FShvUo3QOWhdufOlUy55zJr-yLz5_qs_wW3fy",
+        allowNull: true
     }
 
 })
