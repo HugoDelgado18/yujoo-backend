@@ -37,7 +37,14 @@ router.post('/login', async (req ,res, next) => {
     try {
         const { username, password } = req.body;
         
-        const  userToLogin = await User.findOne({ where: { username: username }});
+        const  userToLogin = await User.findOne({
+            where: {
+                username: username
+            }, include: [
+                { model: Event, as: 'Events' },
+                // { model: Comment, as: "Comments" }
+            ]
+        });
         if (userToLogin === null) {
             res.send('User note found, please try again or register user.');
         } else {
@@ -47,7 +54,7 @@ router.post('/login', async (req ,res, next) => {
                 res.send("Failed to Login.")
             } else {
                 const token = jwt.sign(username, process.env.JWT_SECRET);
-                res.send({ message: `Welcome, ${userToLogin.firstName}, you have successfully been logged in!`, token });
+                res.send({ message: `Welcome, ${userToLogin.firstName}, you have successfully been logged in!`, token, userToLogin });
             }
         }
     } catch (error) {
